@@ -31,6 +31,7 @@ text.scan(regex).each do |name, css|
         end
     end
 
+    list[-1].sub!(/:$/, "")
     name = name.gsub(/^Styled/, '')
     new_name = name[0].downcase + name[1..-1]
     name_css_hash[new_name] = "export const #{new_name}Style = style({" + list.join(",") + "})"
