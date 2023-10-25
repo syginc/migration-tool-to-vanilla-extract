@@ -22,7 +22,7 @@ File.open(ARGV[0]) do |file|
 
     puts %q(import {style} from "@vanilla-extract/css";)
     name_css_hash.each do |_, value|
-        puts value
         puts
+        puts value + ";"
     end
 end
