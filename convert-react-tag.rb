@@ -6,10 +6,12 @@ filepath = ARGV[0]
 filename = filepath.split("/")[-1]
 new_filename = filename.gsub("tsx", "css")
 
+linaria_style_regex = %r|const (\w+) = styled.(.*?)`.*?`;|m
+
 File.open(ARGV[0]) do |file|
     text = file.read
 
-    list = text.scan(%r|const (\w+) = styled.(.*?)`.*?`|m)
+    list = text.scan(linaria_style_regex)
     new_name_list = []
     list.each do |name, tag|
         name = name.gsub(/^Styled/, '')
@@ -20,15 +22,17 @@ File.open(ARGV[0]) do |file|
 
         if text.match(regex)
             text.gsub!(regex) do
-                "<#{tag} classname={#{new_name}}#{$1}</#{tag}>"
+                "<#{tag} className={#{new_name}}#{$1}</#{tag}>"
             end
         else
             text.gsub!(%r|<#{name}(.*?)\/>|m) do
-                "<#{tag} classname={#{new_name}}#{$1}/>"
+                "<#{tag} className={#{new_name}}#{$1}/>"
             end
         end
     end
 
     puts %Q(import {#{new_name_list.join(", ")}} from "#{new_filename}")
     puts text
+      .gsub(linaria_style_regex, '')
+      .gsub(%r|\n{3,}|) { "\n\n" }
 end
