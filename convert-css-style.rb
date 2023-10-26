@@ -42,8 +42,11 @@ File.open(new_fullpath, "w") do |io|
     io.write("\n")
 
     css_variables.each do |var|
-        path = text.scan(%r|import \{.*#{var}.*\} from \"(.*)\";|)[0][0]
-        io.write(%Q(import {#{var}} from "#{path}";))
+        pathList = text.scan(%r|import \{.*#{var}.*\} from \"(.*?)\";|m)
+        unless pathList.empty?
+            path = pathList[0][0]
+            io.write(%Q(import {#{var}} from "#{path}";\n))
+        end
     end
 
     name_css_hash.each do |_, value|
