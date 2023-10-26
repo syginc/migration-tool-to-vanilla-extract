@@ -14,3 +14,9 @@ ruby convert-react-tag.rb example/site/components/templates/site-layout/site-lay
 ruby convert-react-tag.rb example/site/components/templates/site-layout/site-layout.tsx
 ```
 -> site-layout.css.tsが作成される。
+
+### 実作業
+- src/site以下のファイルに`convert-css-style.rb`を適用する場合
+```
+find src/site -type f -name "*.tsx" | xargs -I{} ruby convert-css-style.rb '{}'
+```
