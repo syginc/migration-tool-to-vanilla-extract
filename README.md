@@ -15,9 +15,9 @@ ruby convert-react-tag.rb example/site/components/templates/site-layout/site-lay
 ```
 -> site-layout.css.tsが作成される。
 
-### 実作業
+### 実際の作業例
 - src/site以下のファイルに`convert-css-style.rb`を適用する場合
-* 順番通りにコマンドを適用すること。スクリプトの関係上順番が前後すると生成が上手くいかないはず。
+* 順番通りにコマンドを適用すること。スクリプトの関係上順番が前後すると生成が上手くいかないかもしれない。
 1. <filename>.css.tsを生成する
 ```
 find src/site -type f -name "*.tsx" | xargs -I{} ruby convert-css-style.rb '{}'
@@ -30,3 +30,8 @@ find src/site -type f -name "*.tsx" | xargs -I{} cp '{}' '{}.bak'
 ```
 find src/site -type f -name "*.tsx" | xargs -I{} ruby convert-react-tag.rb '{}'
 ```
+
+### convert-react-tag.rb
+`<SiteMain>`のようなタグを`<div className={siteMainStyle}>`に変更するスクリプト。タグの属性にすでに`className`が設定されている場合は手動で修正する必要がある。
+
+### convert-css-style.rb
