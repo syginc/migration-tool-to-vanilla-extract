@@ -20,3 +20,8 @@ ruby convert-react-tag.rb example/site/components/templates/site-layout/site-lay
 ```
 find src/site -type f -name "*.tsx" | xargs -I{} ruby convert-css-style.rb '{}'
 ```
+
+- src/site以下のtsxファイルについてバックアップファイルを作成
+```
+find src/site -type f -name "*.tsx" | xargs -I{} cp '{}' '{}.bak'
+```
