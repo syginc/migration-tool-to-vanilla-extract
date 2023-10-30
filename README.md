@@ -28,5 +28,5 @@ find src/site -type f -name "*.tsx" | xargs -I{} cp '{}' '{}.bak'
 ```
 3. <filename>.tsxファイルにconvert-react-tag.rbを適用する
 ```
-find src/site -type f -name "*.tsx" | xargs -I{} ruby convert-css-style.rb '{}'
+find src/site -type f -name "*.tsx" | xargs -I{} ruby convert-react-tag.rb '{}'
 ```
