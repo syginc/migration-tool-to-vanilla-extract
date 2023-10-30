@@ -34,7 +34,7 @@ list.each do |name, tag|
 end
 
 File.open(ARGV[0], 'w') do |io|
-    io.write(%Q(import {#{new_name_list.join(", ")}} from "#{new_filename}";\n))
+    io.write(%Q(import {#{new_name_list.join(", ")}} from "./#{new_filename}";\n))
     io.write(text
       .gsub(linaria_style_regex, '')
       .gsub(%r|\n{3,}|) { "\n\n" }
