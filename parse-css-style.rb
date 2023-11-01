@@ -2,26 +2,20 @@
 
 text = DATA.read
 
-name_css_hash = {}
-regex = %r|const (\w+) = styled.*?`(.*?)`|m
-
-def process_css(css)
+def convert_vanilla_extract_css_style(css)
     css_variables = []
-    list = css.split(/;/).map do |s|
-        pair = s.split(/:/)
-        key = pair[0].gsub(%r|-([a-z])|) { $1.upcase }
-        value = pair[1].gsub(%r|^(\s*)(.*?)(\s*)$|, '\1"\2"\3') if pair[1]
-        regex = %r|\"\$\{(.*)\}\"|
-        if regex.match(value)
-            var = value.gsub(regex, '\1')
+    css_regex = %r%(.*?):(.*?);%m
+    list = css.scan(css_regex).map do |key, value|
+        kebab_key = key.gsub(%r|-([a-z])|) { $1.upcase }
+        quoted_value = value.gsub(%r|^(\s*)(.*?)(\s*)$|, '\1"\2"\3') if value
+        variable_regex = %r|\"\$\{(.*)\}\"|
+        if variable_regex.match(quoted_value)
+            var = quoted_value.gsub(variable_regex, '\1')
             css_variables.append(var.strip)
-            "#{key}:#{var}"
+            "#{kebab_key}:#{var},"
         else
-            "#{key}:#{value}"
+            "#{kebab_key}:#{quoted_value},"
         end
-    end
-    if list[-1]
-        list[-1].sub!(/:$/, "")
     end
     [list, css_variables]
 end
@@ -32,24 +26,31 @@ def convert_media_query(css)
     css.gsub(regex) do
         word = $1
         contents = $2
-        p contents
         new_word = "vanillaExtract" + word[0].upcase + word[1..-1]
-        '"@media": {' + "\n" + "\s" * 8 + "[#{new_word}]: #{contents}}"
+        <<TEXT
+"@media": {
+        [#{new_word.strip}]: {
+            #{contents.strip}
+        },
+    },
+TEXT
     end
 end
 
-text.scan(regex).each do |name, css|
-    new_css = convert_media_query(css)
-    list = process_css(new_css)[0]
+name_css_hash = {}
+
+text.scan(%r|const (\w+) = styled.*?`(.*?)`|m).each do |name, css|
+    # new_css = convert_media_query(css)
+    list = convert_vanilla_extract_css_style(css)[0]
 
     name = name.gsub(/^Styled/, '')
     new_name = name[0].downcase + name[1..-1]
-    name_css_hash[new_name] = "export const #{new_name}Style = style({" + list.join(",") + "})"
+    name_css_hash[new_name] = "export const #{new_name}Style = style({" + list.join + "\n" + "\s" * 4 + "}," + "\n);"
 end
 
 name_css_hash.each do |_, value|
     puts("\n\n")
-    puts("#{value}")
+    puts("#{convert_media_query(value)}")
 end
 __END__
 

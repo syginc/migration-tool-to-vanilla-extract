@@ -4,21 +4,37 @@
 
 def process_css(css)
     css_variables = []
-    list = css.split(/;/).map do |s|
-        pair = s.split(/:/)
-        key = pair[0].gsub(%r|-([a-z])|) { $1.upcase }
-        value = pair[1].gsub(%r|^(\s*)(.*?)(\s*)$|, '\1"\2"\3') if pair[1]
-        regex = %r|\"\$\{(.*)\}\"|
-        if regex.match(value)
-            var = value.gsub(regex, '\1')
+    css_regex = %r%(.*?):(.*?);%m
+    list = css.scan(css_regex).map do |key, value|
+        kebab_key = key.gsub(%r|-([a-z])|) { $1.upcase }
+        quoted_value = value.gsub(%r|^(\s*)(.*?)(\s*)$|, '\1"\2"\3') if value
+        variable_regex = %r|\"\$\{(.*)\}\"|
+        if variable_regex.match(quoted_value)
+            var = quoted_value.gsub(variable_regex, '\1')
             css_variables.append(var.strip)
-            "#{key}:#{var}"
+            "#{kebab_key}:#{var},"
         else
-            "#{key}:#{value}"
+            "#{kebab_key}:#{quoted_value},"
         end
     end
-    list[-1].sub!(/:$/, "") if list[-1]
     [list, css_variables]
+end
+
+def convert_media_query(css)
+    words_regex = Regexp.union(["mediaUpToSmall", "mediaMiddleUp"])
+    regex = %r|\$\{(#{words_regex})\} \{(.*?)\}|m
+    css.gsub(regex) do
+        word = $1
+        contents = $2
+        new_word = "vanillaExtract" + word[0].upcase + word[1..-1]
+        <<TEXT
+"@media": {
+        [#{new_word.strip}]: {
+            #{contents.strip}
+        },
+    },
+TEXT
+    end
 end
 
 full_filepath = ARGV[0]
@@ -39,7 +55,7 @@ text.scan(%r|const (\w+) = styled.*?`(.*?)`|m).each do |name, css|
 
     name = name.gsub(/^Styled/, '')
     new_name = name[0].downcase + name[1..-1]
-    name_css_hash[new_name] = "export const #{new_name}Style = style({" + list.join(",") + "})"
+    name_css_hash[new_name] = "export const #{new_name}Style = style({" + list.join + "\n" + "\s" * 4 + "}," + "\n);"
 end
 
 File.open(new_fullpath, "w") do |io|
@@ -56,6 +72,6 @@ File.open(new_fullpath, "w") do |io|
 
     name_css_hash.each do |_, value|
         io.write("\n\n")
-        io.write("#{value};")
+        io.write("#{convert_media_query(value)}")
     end
 end
