@@ -7,7 +7,7 @@ def process_css(css)
     css.scan(css_regex).map do |key, value|
         kebab_key = key.gsub(%r|-([a-z])|) { $1.upcase }
         quoted_value = value.gsub(%r|^(\s*)(.*?)(\s*)$|, '\1"\2"\3') if value
-        // Can refactor
+        # Can refactor
         variable_regex = %r|\"\$\{(.*)\}\"|
         if variable_regex.match(quoted_value)
             "#{kebab_key}:#{quoted_value.gsub(variable_regex, '\1')},"
@@ -57,7 +57,7 @@ File.open(new_fullpath, "w") do |io|
     io.write(%q(import {style} from "@vanilla-extract/css";))
     io.write("\n")
 
-    // Can refacotr
+    # Can refacotr
     name_css_hash.each do |_, value|
         io.write("\n\n")
         io.write("#{convert_media_query(value)}")
