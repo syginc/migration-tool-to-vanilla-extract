@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+require_relative('func.rb')
 
 # Convert react tag into vanilla extract style
 
@@ -16,8 +17,7 @@ end
 list = text.scan(linaria_style_regex)
 new_name_list = []
 list.each do |name, tag|
-    name = name.gsub(/^Styled/, '')
-    new_name = name[0].downcase + name[1..-1] + "Style"
+    new_name = make_style_name(name)
     new_name_list.append(new_name)
 
     regex = %r|<#{name}(.*)<\/#{name}>|m

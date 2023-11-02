@@ -4,19 +4,10 @@ require_relative('func.rb')
 text = DATA.read
 
 name_css_hash = {}
+regex = %r|const (\w+) = styled.*?`(.*?)`|m
 
-text.scan(%r|const (\w+) = styled.*?`(.*?)`|m).each do |name, css|
-    list = convert_vanilla_extract_css_style(css)
+puts convert_media_query(convert_vanilla_extract_css_style(convert_style_name(text)))
 
-    name = name.gsub(/^Styled/, '')
-    new_name = name[0].downcase + name[1..-1]
-    name_css_hash[new_name] = "export const #{new_name}Style = style({" + list.join + "\n" + "\s" * 4 + "}," + "\n);"
-end
-
-name_css_hash.each do |_, value|
-    puts("\n\n")
-    puts("#{convert_media_query(value)}")
-end
 __END__
 
 const CoverContainerDiv = styled.div`
@@ -54,4 +45,16 @@ const ArticleMainColumnDiv = styled(MainColumnDiv)`
         width: ${720 + articleBodyPaddingWidthDesktop * 2}px;
         padding: 0 ${articleBodyPaddingWidthDesktop}px;
     }
+`;
+
+const GlobalHeaderRightDiv = styled.div`
+    margin-left: auto;
+
+    ${mediaMiddleUp} {
+        gap: 0 20px;
+    }
+
+    display: flex;
+    gap: 0;
+    height: 100%;
 `;

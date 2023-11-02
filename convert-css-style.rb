@@ -14,22 +14,15 @@ File.open(ARGV[0]) do |file|
     text = file.read
 end
 
-name_css_hash = {}
-text.scan(%r|const (\w+) = styled.*?`(.*?)`|m).each do |name, css|
-    list = convert_vanilla_extract_css_style(css)
-
-    name = name.gsub(/^Styled/, '')
-    new_name = name[0].downcase + name[1..-1]
-    name_css_hash[new_name] = "export const #{new_name}Style = style({" + list.join + "\n" + "\s" * 4 + "}," + "\n);"
-end
-
 File.open(new_fullpath, "w") do |io|
     io.write(%q(import {style} from "@vanilla-extract/css";))
     io.write("\n")
 
-    # Can refacotr
-    name_css_hash.each do |_, value|
-        io.write("\n\n")
-        io.write("#{convert_media_query(value)}")
+    output = convert_media_query(convert_vanilla_extract_css_style(convert_style_name(text)))
+    styles = scan_vanilla_css(output)
+
+    styles.each do |style|
+    io.write("\n")
+        io.write(style)
     end
 end
