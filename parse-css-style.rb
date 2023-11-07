@@ -3,9 +3,6 @@ require_relative('func.rb')
 
 text = DATA.read
 
-name_css_hash = {}
-regex = %r|const (\w+) = styled.*?`(.*?)`|m
-
 puts convert_media_query(convert_vanilla_extract_css_style(convert_style_name(text)))
 
 __END__
