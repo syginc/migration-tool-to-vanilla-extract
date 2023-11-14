@@ -1,44 +1,15 @@
 #!/usr/bin/ruby
 
+require_relative('func-aom.rb')
+
 text = DATA.read
 
-def changeKebabWithSnake(props)
-    props.map do |key, value|
-        [key.gsub(/-([a-z])/) {$1.upcase}, value]
-    end
-end
-
-def write_selector(selector, props)
-    p = props.map do |key, value|
-        %!    #{key}: #{value},!
-    end
-    puts %Q%globalStyle(contentSelector(#{selector}),\n#{p.join("\n")}%
-    puts "\n"
-    puts "});"
-    puts "\n"
-end
-
-def write_global_style(global_list)
-    global_list.each do |list|
-        key, value = list
-        write_selector(key, value)
-    end
-end
-
-def scan_props(partial, space_size)
-    props_regex = /^\s{#{space_size + 4}}([^\s].*?):\s(.*?);/
-    partial.scan(props_regex)
-end
-
-def scan_css_partial(partial, space_size)
-    selector_regex = /^\s{#{space_size + 4}}([^\s][^\n]*?) \{(.*?)^\s{#{space_size + 4}}\}/m
-    partial.scan(selector_regex)
-end
-
-def process_css_partial(partial, selector, space_size)
-    partial.map do |child_selector, sub_partial|
-        child_props = scan_props(sub_partial, space_size + 4)
-        ["#{selector} #{child_selector}", changeKebabWithSnake(child_props)]
+import_libraries = []
+text.scan(/(import {.*?} from ".*?";)/m) do
+    matched = $1
+    npm_library = matched.match(/import {.*?} from "(.*?)";/m).to_a[1]
+    if npm_library != "linaria"
+        import_libraries.append(matched)
     end
 end
 
@@ -77,7 +48,7 @@ text.scan(regex) do
             end
         end
     end
-    write_global_style(global_style_key_props)
+    # write_global_style(global_style_key_props)
 end
 
 __END__
