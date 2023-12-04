@@ -65,3 +65,4 @@ git ls-files | grep tsx | grep "/box" | xargs -I{} ruby -i -pe '$_.gsub!("-style
 ```sh
 git ls-files | grep styles | grep "/box" | xargs rm
 ```
+上記のコマンドで余分なパスが現れた場合は、`grep -v "editor"`でなど該当の余分なパスを除外する。
